@@ -844,7 +844,14 @@
               placeHolder.css('display', 'block');
             }
             if (!targetScope.sortableScope.options.clone) {
-              targetElement[0].parentNode.insertBefore(placeHolder[0], targetElement[0]);
+
+
+              var clone = targetElement[0].cloneNode(true);
+
+              placeHolder[0].parentNode.appendChild(clone);
+              // TODO Need to add this dragItemInfo here or logic how it's adding a new element
+
+              targetElement[0].parentNode.replaceChild(placeHolder[0], targetElement[0]);
               dragItemInfo.moveTo(targetScope.sortableScope, targetScope.index());
             }
           }
