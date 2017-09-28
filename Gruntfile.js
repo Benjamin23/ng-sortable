@@ -39,7 +39,7 @@ module.exports = function (grunt) {
           '<%= cfg.srcDir %>/**/*.*',
           '!<%= cfg.buildDir %>/*.*'
         ],
-        tasks: ['jshint:source', 'clean:build', 'concat:build', 'uglify:build', 'cssmin', 'copy']
+        tasks: [ 'clean:build', 'concat:build', 'uglify:build', 'cssmin', 'copy']
       },
       cssmin: {
         files: [

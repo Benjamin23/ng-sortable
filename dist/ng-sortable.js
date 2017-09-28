@@ -872,8 +872,83 @@
            * @param event - the event object.
            */
           dragMove = function (event) {
+          };
 
-            var eventObj, targetX, targetY, targetScope, targetElement;
+
+          /**
+           * Fetch scope from element or parents
+           * @param  {object} element Source element
+           * @return {object}         Scope, or null if not found
+           */
+          function fetchScope(element) {
+            var scope;
+            while (!scope && element.length) {
+              scope = element.data('_scope');
+              if (!scope) {
+                element = element.parent();
+              }
+            }
+            return scope;
+          }
+
+
+          /**
+           * Get position of place holder among item elements in itemScope.
+           * @param targetElement the target element to check with.
+           * @returns {*} -1 if placeholder is not present, index if yes.
+           */
+          placeHolderIndex = function (targetElement) {
+            var itemElements, i;
+            // targetElement is placeHolder itself, return index 0
+            if (targetElement.hasClass(sortableConfig.placeHolderClass)){
+              return 0;
+            }
+            // find index in target children
+            itemElements = targetElement.children();
+            for (i = 0; i < itemElements.length; i += 1) {
+              //TODO may not be accurate when elements contain other siblings than item elements
+              //solve by adding 1 to model index of previous item element
+              if (angular.element(itemElements[i]).hasClass(sortableConfig.placeHolderClass)) {
+                return i;
+              }
+            }
+            return -1;
+          };
+
+
+          /**
+           * Check there is no place holder placed by itemScope.
+           * @param targetElement the target element to check with.
+           * @returns {*} true if place holder present.
+           */
+          isPlaceHolderPresent = function (targetElement) {
+            return placeHolderIndex(targetElement) >= 0;
+          };
+
+          /**
+           * Rollback the drag data changes.
+           */
+
+          function rollbackDragChanges() {
+            if (!scope.itemScope.sortableScope.cloning) {
+              placeElement.replaceWith(scope.itemScope.element);
+            }
+            placeHolder.remove();
+            dragElement.remove();
+            dragElement = null;
+            dragHandled = false;
+            containment.css('cursor', '');
+            containment.removeClass('as-sortable-un-selectable');
+          }
+
+          /**
+           * triggered while drag ends.
+           *
+           * @param event - the event object.
+           */
+          dragEnd = function (event) {
+            
+                        var eventObj, targetX, targetY, targetScope, targetElement;
 
             if (hasTouch && $helper.isTouchInvalid(event)) {
               return;
@@ -954,81 +1029,7 @@
                 }
               }
             }
-          };
 
-
-          /**
-           * Fetch scope from element or parents
-           * @param  {object} element Source element
-           * @return {object}         Scope, or null if not found
-           */
-          function fetchScope(element) {
-            var scope;
-            while (!scope && element.length) {
-              scope = element.data('_scope');
-              if (!scope) {
-                element = element.parent();
-              }
-            }
-            return scope;
-          }
-
-
-          /**
-           * Get position of place holder among item elements in itemScope.
-           * @param targetElement the target element to check with.
-           * @returns {*} -1 if placeholder is not present, index if yes.
-           */
-          placeHolderIndex = function (targetElement) {
-            var itemElements, i;
-            // targetElement is placeHolder itself, return index 0
-            if (targetElement.hasClass(sortableConfig.placeHolderClass)){
-              return 0;
-            }
-            // find index in target children
-            itemElements = targetElement.children();
-            for (i = 0; i < itemElements.length; i += 1) {
-              //TODO may not be accurate when elements contain other siblings than item elements
-              //solve by adding 1 to model index of previous item element
-              if (angular.element(itemElements[i]).hasClass(sortableConfig.placeHolderClass)) {
-                return i;
-              }
-            }
-            return -1;
-          };
-
-
-          /**
-           * Check there is no place holder placed by itemScope.
-           * @param targetElement the target element to check with.
-           * @returns {*} true if place holder present.
-           */
-          isPlaceHolderPresent = function (targetElement) {
-            return placeHolderIndex(targetElement) >= 0;
-          };
-
-          /**
-           * Rollback the drag data changes.
-           */
-
-          function rollbackDragChanges() {
-            if (!scope.itemScope.sortableScope.cloning) {
-              placeElement.replaceWith(scope.itemScope.element);
-            }
-            placeHolder.remove();
-            dragElement.remove();
-            dragElement = null;
-            dragHandled = false;
-            containment.css('cursor', '');
-            containment.removeClass('as-sortable-un-selectable');
-          }
-
-          /**
-           * triggered while drag ends.
-           *
-           * @param event - the event object.
-           */
-          dragEnd = function (event) {
             // Ignore event if not handled
             if (!dragHandled) {
               return;
